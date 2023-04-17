@@ -2,6 +2,7 @@
 using Utils.Math;
 using Data.Initial;
 using Utils.Output;
+using Data.Result;
 
 namespace Simple
 {
@@ -23,6 +24,8 @@ namespace Simple
                 sw.Stop();
 
                 Printer.PrintResult(size, min, elemCount, sw);
+
+                Results.Clear();    
             }
         }
     }

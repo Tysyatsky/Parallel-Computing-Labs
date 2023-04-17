@@ -24,6 +24,7 @@ namespace Atomic
                 sw.Stop();
 
                 Printer.PrintResult(size, Results.min, Results.count, sw);
+                Results.Clear();
             }
         }
     }
