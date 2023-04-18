@@ -20,7 +20,8 @@ namespace Utils.Routine.Setting
             do
             {
                 initialValue = location;
-                if (initialValue > comparison) return false;
+                if (initialValue < comparison) 
+                    return false;
             }
             while (Interlocked.CompareExchange(ref location, newValue, initialValue) != initialValue);
             return true;
