@@ -18,20 +18,22 @@ namespace Server
             Console.WriteLine("Client connected.");
 
             // Create a CustomProtocol instance using the client's network stream
-            CustomProtocol protocol = new(client.GetStream());
+            MatrixProtocol protocol = new(client.GetStream());
 
             // Wait for messages from the client and send them back
             while (true)
             {
                 try
                 {
-                    byte[] message = protocol.Receive();
+                    byte[] message = protocol.ReceiveData();
                     Console.WriteLine("Received message from client.");
 
                     // Modify the message before sending it back to the client
-                    message[0] = (byte)(message[0] + 1);
+                    // message[0] = (byte)(message[0]);
 
-                    protocol.Send(message);
+                    // getting this modifing here
+
+                    protocol.SendData(message);
                     Console.WriteLine("Sent message back to client.");
                 }
                 catch (Exception ex)

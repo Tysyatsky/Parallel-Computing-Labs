@@ -3,13 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pc_lab4", "pc_lab4\pc_lab4.csproj", "{89943457-BF25-4945-9000-A359611F476A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pc_lab4", "pc_lab4\pc_lab4.csproj", "{89943457-BF25-4945-9000-A359611F476A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkProtocols", "NetworkProtocols\NetworkProtocols.csproj", "{DB6BD2C2-84B8-46A8-B2A5-AFE536A39F51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkProtocols", "NetworkProtocols\NetworkProtocols.csproj", "{DB6BD2C2-84B8-46A8-B2A5-AFE536A39F51}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "Server\Server.csproj", "{1C87F01F-A1A4-46A0-95D0-C9BF1A38EA8A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server", "Server\Server.csproj", "{1C87F01F-A1A4-46A0-95D0-C9BF1A38EA8A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{2F83532F-1710-4622-AB72-378A8AC6D493}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "Client\Client.csproj", "{2F83532F-1710-4622-AB72-378A8AC6D493}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatrixConverter", "MatrixConverter\MatrixConverter.csproj", "{597D116D-F3AD-4811-8E27-06988F271720}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{D5C676D1-B752-4F37-A5D4-740D46203411}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{C12A6911-96FF-45F4-8B00-571B006E0FA2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +39,18 @@ Global
 		{2F83532F-1710-4622-AB72-378A8AC6D493}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F83532F-1710-4622-AB72-378A8AC6D493}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F83532F-1710-4622-AB72-378A8AC6D493}.Release|Any CPU.Build.0 = Release|Any CPU
+		{597D116D-F3AD-4811-8E27-06988F271720}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{597D116D-F3AD-4811-8E27-06988F271720}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{597D116D-F3AD-4811-8E27-06988F271720}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{597D116D-F3AD-4811-8E27-06988F271720}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5C676D1-B752-4F37-A5D4-740D46203411}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5C676D1-B752-4F37-A5D4-740D46203411}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5C676D1-B752-4F37-A5D4-740D46203411}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5C676D1-B752-4F37-A5D4-740D46203411}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C12A6911-96FF-45F4-8B00-571B006E0FA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C12A6911-96FF-45F4-8B00-571B006E0FA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C12A6911-96FF-45F4-8B00-571B006E0FA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C12A6911-96FF-45F4-8B00-571B006E0FA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
