@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Net;
 using System.Net.Sockets;
 using NetworkProtocols;
 
@@ -6,6 +8,7 @@ namespace Server
 {
     class CustomProtocolServer
     {
+        private static readonly ConcurrentDictionary<int, TcpClient> _clients = new();
         static void Main()
         {
             // Listen for incoming connections on port 1234
@@ -13,40 +16,50 @@ namespace Server
             listener.Start();
             Console.WriteLine("CustomProtocolServer started. Listening for connections on port 1234...");
 
-            // Accept a client connection
-            TcpClient client = listener.AcceptTcpClient();
+            while (_clients != null && _clients.Count < 10000)
+            {
+                // Accept a client connection
+                TcpClient client = listener.AcceptTcpClient();
+                if(_clients.TryAdd(client.GetHashCode(), client))
+                {
+                    Task.Run(() => HandleClient(client));
+                }
+            }
+            listener.Stop();
+        }
+
+        static void HandleClient(TcpClient client)
+        {
             Console.WriteLine("Client connected.");
+            Thread.Sleep(7000);
 
             // Create a CustomProtocol instance using the client's network stream
             MatrixProtocol protocol = new(client.GetStream());
 
             // Wait for messages from the client and send them back
-            while (true)
+            try
             {
-                try
-                {
-                    byte[] message = protocol.ReceiveData();
-                    Console.WriteLine("Received message from client.");
+                // byte[] message = protocol.ReceiveData();
+                int[][] message = protocol.ReceiveMatrix();
+                Console.WriteLine("Received message from client.");
+                // Console.WriteLine(message[0]);
+                // message[0] = new int[4];
 
-                    // Modify the message before sending it back to the client
-                    // message[0] = (byte)(message[0]);
+                // getting this modifing here
 
-                    // getting this modifing here
+                protocol.SendMatrix(message);
+                Console.WriteLine("Sent message back to client.");
 
-                    protocol.SendData(message);
-                    Console.WriteLine("Sent message back to client.");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error: {ex.Message}");
-                    break;
-                }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                // break;
+            }
+            
 
             // Clean up the connection
             client.Close();
-            listener.Stop();
-            Console.WriteLine("CustomProtocolServer stopped.");
         }
     }
 }
