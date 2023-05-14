@@ -5,61 +5,51 @@ using NetworkProtocols;
 namespace Client
 {
     internal class Program
-    {
+    {   
+        private static bool _resultState = false;
         static void Main(string[] args)
         {
             TcpClient client = new TcpClient();
             client.Connect(IPAddress.Loopback, 1234);
 
-            // Create a CustomProtocol instance using the client's network stream
             MatrixProtocol protocol = new MatrixProtocol(client.GetStream());
 
-            int[][] testMatrix = new int[5][];
+            int menuOption = int.MinValue;
 
-            for (int i = 0; i < testMatrix.Length; i++)
+            while (menuOption != 0)
             {
-                testMatrix[i] = new int[5];
+                ShowMenu();
+                var readedOption = Console.ReadLine();
+
+                if (int.TryParse(readedOption, out menuOption))
+                {
+                    switch (menuOption)
+                    {   
+                        case 1:
+                            ProtocolAction(protocol);
+                            break;
+                        case 2:
+                            ResultCheck(protocol);
+                            break;
+                        case 3:
+                            break;
+                        case 0:
+
+                        default:
+                            break;
+                    }
+                }
             }
 
-            //byte[] message = new byte[1_024];
-            //for (int i = 0; i < testMatrix.LongLength; i++)
-            //{
-            //    for (int j = 0; j < testMatrix[i].Length; j++)
-            //    {
-            //        message[i] = (byte)testMatrix[i][j]; // Set the first byte to the message index
-            //        protocol.SendData(message);
-            //        i++;
-            //    }
-            //}
-
-            protocol.SendMatrix(testMatrix);
-
-            // Receive the 10 messages and check if they match the sent messages
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    byte[] receivedMessage = protocol.ReceiveData();
-            //    Console.WriteLine($"Success: This message was received: {receivedMessage[0]}");
-            //    if (receivedMessage[0] != i)
-            //    {
-            //        // throw new Exception($"Received message {receivedMessage[0]} does not match expected message {i}.");
-            //        Console.WriteLine($"Error: This message was received: {receivedMessage[0]}");
-            //    }
-            //}
-
-            var matrix = protocol.ReceiveMatrix();
-
-            foreach (var item in matrix)
-            {
-
-            }
-
-            Console.WriteLine(matrix);
-
-            // Clean up the connection
             client.Close();
         }
 
-        private IEnumerable<int> RandomIntsGenerator(int numberCount, int maxValue = 10, int minValue = 1)
+        private static void SwitchState()
+        {
+            _resultState = !_resultState;
+        }
+
+        private static IEnumerable<int> RandomIntsGenerator(int numberCount, int maxValue = 10, int minValue = 1)
         {
             var rnd = new Random();
             var list = new List<int>();
@@ -70,18 +60,62 @@ namespace Client
             }
             return list;
         }
-        private void Fill(int[][] matrix)
+        private static void Fill(int[][] matrix)
         {   
-            if(matrix != null)
-            {   
-                for (int i = 0; i < 5; i++)
+            if(matrix == null)
+            {
+                Console.WriteLine("Matrix is null!");
+                return;
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                if (matrix[i] == null)
                 {
-                    if (matrix[i] != null)
-                    {
-                        matrix[i] = RandomIntsGenerator(5).ToArray();
-                    }
+                    Console.WriteLine("Matrix row is null!");
+                    return;
+                }
+                matrix[i] = RandomIntsGenerator(5).ToArray();
+            }
+        }
+
+        private static void ShowMenu()
+        {
+            Console.WriteLine("Client menu: ");
+            Console.WriteLine("1. Send Data");
+            Console.WriteLine("2. Start calculation");
+            Console.WriteLine("3. Ask for result");
+            Console.WriteLine("0. Exit");
+        }
+
+        private static void ProtocolAction(MatrixProtocol protocol)
+        {
+            int[][] testMatrix = new int[5][];
+
+            for (int i = 0; i < testMatrix.Length; i++)
+            {
+                testMatrix[i] = new int[5];
+            }
+
+            Fill(testMatrix);
+
+            protocol.SendMatrix(testMatrix);
+
+            var matrix = protocol.ReceiveMatrix();
+
+            SwitchState();
+
+            foreach (var array in matrix)
+            {
+                foreach (var item in array)
+                {
+                    Console.WriteLine(item);
                 }
             }
+        }
+
+        private static void ResultCheck(MatrixProtocol protocol)
+        {
+           // if()
         }
     }
 }
