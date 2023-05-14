@@ -42,10 +42,8 @@ namespace Server
                 // byte[] message = protocol.ReceiveData();
                 int[][] message = protocol.ReceiveMatrix();
                 Console.WriteLine("Received message from client.");
-                // Console.WriteLine(message[0]);
-                // message[0] = new int[4];
 
-                // getting this modifing here
+                // here needs to be future/promice bitchesssss
 
                 protocol.SendMatrix(message);
                 Console.WriteLine("Sent message back to client.");
