@@ -1,6 +1,8 @@
 ﻿using System.Net.Sockets;
 using System.Net;
 using NetworkProtocols;
+using System.Net.Http.Headers;
+using Models;
 
 namespace Client
 {
@@ -9,39 +11,38 @@ namespace Client
         private static bool _resultState = false;
         static void Main(string[] args)
         {
-            TcpClient client = new TcpClient();
-            client.Connect(IPAddress.Loopback, 1234);
 
-            MatrixProtocol protocol = new MatrixProtocol(client.GetStream());
+            TcpClient client = new();
+            client.Connect(IPAddress.Loopback, 4000);
 
-            int menuOption = int.MinValue;
+            MatrixProtocol protocol = new(client.GetStream());
 
-            while (menuOption != 0)
+            while (true)
             {
                 ShowMenu();
                 var readedOption = Console.ReadLine();
 
-                if (int.TryParse(readedOption, out menuOption))
+                if (int.TryParse(readedOption, out int menuOption))
                 {
                     switch (menuOption)
-                    {   
+                    {
                         case 1:
-                            ProtocolAction(protocol);
+                            ProtocolActionSend(protocol, args[0], args[1], args[2]);
                             break;
                         case 2:
-                            ResultCheck(protocol);
+                            // ResultCheck(protocol);
                             break;
                         case 3:
+                            ProtocolActionRecieve(protocol);
                             break;
                         case 0:
-
+                            client.Close();
+                            return;
                         default:
                             break;
                     }
                 }
             }
-
-            client.Close();
         }
 
         private static void SwitchState()
@@ -67,14 +68,14 @@ namespace Client
                 Console.WriteLine("Matrix is null!");
                 return;
             }
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < matrix.Length; i++)
             {
                 if (matrix[i] == null)
                 {
                     Console.WriteLine("Matrix row is null!");
                     return;
                 }
-                matrix[i] = RandomIntsGenerator(5).ToArray();
+                matrix[i] = RandomIntsGenerator(matrix.Length).ToArray();
             }
         }
 
@@ -87,35 +88,50 @@ namespace Client
             Console.WriteLine("0. Exit");
         }
 
-        private static void ProtocolAction(MatrixProtocol protocol)
-        {
-            int[][] testMatrix = new int[5][];
+        private static void ProtocolActionSend(MatrixProtocol protocol, string clientId, string threadCount, string paramSize)
+        {   
+            if(!int.TryParse(paramSize, out int size) 
+                || !int.TryParse(clientId, out int client) 
+                || !int.TryParse(threadCount, out int threads))
+            {
+                return;
+            }
+
+            int[][] testMatrix = new int[size][];
 
             for (int i = 0; i < testMatrix.Length; i++)
             {
-                testMatrix[i] = new int[5];
+                testMatrix[i] = new int[size];
             }
 
             Fill(testMatrix);
 
-            protocol.SendMatrix(testMatrix);
+            var configuration = new ProtocolConfigurationData(client, threads, testMatrix);
 
-            var matrix = protocol.ReceiveMatrix();
+            protocol.SendData(configuration);
+        }
+
+        private static void ProtocolActionRecieve(MatrixProtocol protocol)
+        {
+            var data = protocol.ReceiveData();
 
             SwitchState();
-
-            foreach (var array in matrix)
+            
+            if(data != null && data.Matrix != null)
             {
-                foreach (var item in array)
+                foreach (var array in data.Matrix)
                 {
-                    Console.WriteLine(item);
+                    foreach (var item in array)
+                    {
+                        Console.WriteLine(item);
+                    }
                 }
             }
         }
 
-        private static void ResultCheck(MatrixProtocol protocol)
-        {
-           // if()
-        }
+        //private static void StartCalculation(MatrixProtocol protocol)
+        //{
+        //    protocol.SendData();
+        //}
     }
 }

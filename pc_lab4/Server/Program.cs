@@ -2,30 +2,31 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using Models;
 using NetworkProtocols;
 
 namespace Server
 {
+    public enum Commands
+    {
+        START_CALCULATION,
+        GET_RESULT,
+    }
     class CustomProtocolServer
     {
-        private static readonly ConcurrentDictionary<int, TcpClient> _clients = new();
+        private static ConcurrentBag<ProtocolConfigurationData> _clientsData = new();
         static void Main()
         {
-            // Listen for incoming connections on port 1234
-            TcpListener listener = new(IPAddress.Any, 1234);
+            TcpListener listener = new(IPAddress.Any, 4000);
             listener.Start();
-            Console.WriteLine("CustomProtocolServer started. Listening for connections on port 1234...");
+            Console.WriteLine("CustomProtocolServer started. Listening for connections on port 4000...");
 
-            while (_clients != null && _clients.Count < 10000)
+            while (true)
             {
-                // Accept a client connection
                 TcpClient client = listener.AcceptTcpClient();
-                if(_clients.TryAdd(client.GetHashCode(), client))
-                {
-                    Task.Run(() => HandleClient(client));
-                }
+                Task.Run(() => HandleClient(client));
             }
-            listener.Stop();
+            // listener.Stop();
         }
 
         static void HandleClient(TcpClient client)
@@ -33,30 +34,60 @@ namespace Server
             Console.WriteLine("Client connected.");
             Thread.Sleep(7000);
 
-            // Create a CustomProtocol instance using the client's network stream
             MatrixProtocol protocol = new(client.GetStream());
 
-            // Wait for messages from the client and send them back
-            try
+            // bool IsStopped = false;
+
+            while (true)
             {
-                // byte[] message = protocol.ReceiveData();
-                int[][] message = protocol.ReceiveMatrix();
-                Console.WriteLine("Received message from client.");
+                try
+                {  
+                    ProtocolConfigurationData message = protocol.ReceiveData() ?? new ProtocolConfigurationData(-1, 1, new int[1][]);
 
-                // here needs to be future/promice bitchesssss
+                    if(message != null 
+                        && message.ClientId != -1 
+                        && message.Matrix != null) 
+                    {
+                        Console.WriteLine("Received message from client.");
 
-                protocol.SendMatrix(message);
-                Console.WriteLine("Sent message back to client.");
+                        //if (protocol.ReceiveResultCommand() != Commands.START_CALCULATION.ToString())
+                        //{
+                        //    continue;
+                        //}
 
+                        TaskCompletionSource<int[][]> source = new();
+
+                        Task<int[][]> task = source.Task;
+
+                        Thread exec = new Thread(() =>
+                        {
+                            Services.SymmetricService.MakeSemetricalAsync(message.Matrix, 0, message.Matrix.Length, message.ThreadCount, source);
+                        });
+
+                        exec.Start();
+
+                        if(Task.CompletedTask.IsCompleted)
+                        {
+                            protocol.SendData(message);
+                        }
+                        else
+                        {
+                            protocol.SendResultCommand("Wait for the result to compute");
+                        }
+                        Console.WriteLine("Sent message back to client.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Client was not connected. Try again later.");
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-                // break;
-            }
-            
 
-            // Clean up the connection
             client.Close();
         }
     }

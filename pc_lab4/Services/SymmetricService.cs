@@ -16,7 +16,7 @@ namespace Services
         }
 
 
-        public static void MakeSemetricalAsync(Matrix matrix, int start, int size, int threadCount)
+        public static void MakeSemetricalAsync(int[][] matrix, int start, int size, int threadCount, TaskCompletionSource<int[][]> result)
         {
             int rowsPerThread = size / threadCount; 
 
@@ -35,7 +35,7 @@ namespace Services
                     {
                         for (int j = 0; j < size - 1 - i; j++)
                         {
-                            matrix.SetNum(i, j, matrix.InnerMatrix[size - start - 1 - j][size - start - 1 - i]);
+                            matrix[i][j] = matrix[size - start - 1 - j][size - start - 1 - i];
                         }
                     }
                 });
@@ -47,6 +47,8 @@ namespace Services
             {
                 thread.Join();
             }
+
+            result.SetResult(matrix);
         }
     }
 }
