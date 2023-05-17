@@ -1,17 +1,15 @@
 ﻿using System.Net.Sockets;
 using System.Net;
 using NetworkProtocols;
-using System.Net.Http.Headers;
 using Models;
+using Services;
 
 namespace Client
 {
     internal class Program
-    {   
-        private static bool _resultState = false;
+    {
         static void Main(string[] args)
         {
-
             TcpClient client = new();
             client.Connect(IPAddress.Loopback, 4000);
 
@@ -19,119 +17,56 @@ namespace Client
 
             while (true)
             {
-                ShowMenu();
+                PrintService.ShowMenu();
                 var readedOption = Console.ReadLine();
 
                 if (int.TryParse(readedOption, out int menuOption))
                 {
+                    if (!int.TryParse(args[0], out int size)
+                    || !int.TryParse(args[1], out int threads))
+                    {
+                        return;
+                    }
+
+                    var matrix = MatrixGeneratorService.GenerateMatrix(size);
+
+                    var configuration = new ProtocolConfigurationData(threads, matrix);
+
                     switch (menuOption)
                     {
                         case 1:
-                            ProtocolActionSend(protocol, args[0], args[1], args[2]);
-                            break;
+                            protocol.SendData(configuration);
+                            Console.WriteLine("Sended config");
+                            Console.WriteLine(protocol.ReceiveCommand());
+                            continue;
                         case 2:
-                            // ResultCheck(protocol);
-                            break;
+                            protocol.SendCommand("start");
+                            Console.WriteLine("Sended command start");
+                            Console.WriteLine(protocol.ReceiveCommand());
+                            continue;
                         case 3:
-                            ProtocolActionRecieve(protocol);
-                            break;
+                            protocol.SendCommand("result");
+                            ProtocolConfigurationData? data = protocol.ReceiveData();
+                            if (data != null && data.Matrix != null)
+                            {
+                                foreach (var array in data.Matrix)
+                                {
+                                    foreach (var item in array)
+                                    {
+                                        Console.Write(item + " ");
+                                    }
+                                    Console.WriteLine();
+                                }
+                            }
+                            continue;
                         case 0:
+                        default:
+                            protocol.SendCommand("finish");
                             client.Close();
                             return;
-                        default:
-                            break;
                     }
                 }
             }
         }
-
-        private static void SwitchState()
-        {
-            _resultState = !_resultState;
-        }
-
-        private static IEnumerable<int> RandomIntsGenerator(int numberCount, int maxValue = 10, int minValue = 1)
-        {
-            var rnd = new Random();
-            var list = new List<int>();
-
-            for (int i = 0; i < numberCount; i++)
-            {
-                list.Add(rnd.Next(minValue, maxValue));
-            }
-            return list;
-        }
-        private static void Fill(int[][] matrix)
-        {   
-            if(matrix == null)
-            {
-                Console.WriteLine("Matrix is null!");
-                return;
-            }
-            for (int i = 0; i < matrix.Length; i++)
-            {
-                if (matrix[i] == null)
-                {
-                    Console.WriteLine("Matrix row is null!");
-                    return;
-                }
-                matrix[i] = RandomIntsGenerator(matrix.Length).ToArray();
-            }
-        }
-
-        private static void ShowMenu()
-        {
-            Console.WriteLine("Client menu: ");
-            Console.WriteLine("1. Send Data");
-            Console.WriteLine("2. Start calculation");
-            Console.WriteLine("3. Ask for result");
-            Console.WriteLine("0. Exit");
-        }
-
-        private static void ProtocolActionSend(MatrixProtocol protocol, string clientId, string threadCount, string paramSize)
-        {   
-            if(!int.TryParse(paramSize, out int size) 
-                || !int.TryParse(clientId, out int client) 
-                || !int.TryParse(threadCount, out int threads))
-            {
-                return;
-            }
-
-            int[][] testMatrix = new int[size][];
-
-            for (int i = 0; i < testMatrix.Length; i++)
-            {
-                testMatrix[i] = new int[size];
-            }
-
-            Fill(testMatrix);
-
-            var configuration = new ProtocolConfigurationData(client, threads, testMatrix);
-
-            protocol.SendData(configuration);
-        }
-
-        private static void ProtocolActionRecieve(MatrixProtocol protocol)
-        {
-            var data = protocol.ReceiveData();
-
-            SwitchState();
-            
-            if(data != null && data.Matrix != null)
-            {
-                foreach (var array in data.Matrix)
-                {
-                    foreach (var item in array)
-                    {
-                        Console.WriteLine(item);
-                    }
-                }
-            }
-        }
-
-        //private static void StartCalculation(MatrixProtocol protocol)
-        //{
-        //    protocol.SendData();
-        //}
     }
 }

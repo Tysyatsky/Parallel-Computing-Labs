@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NetworkProtocols\NetworkProtocols.csproj" />
-    <ProjectReference Include="..\pc_lab4\pc_lab4.csproj" />
   </ItemGroup>
 
 </Project>

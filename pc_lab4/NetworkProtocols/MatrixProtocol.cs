@@ -16,7 +16,7 @@ namespace NetworkProtocols
 
         public void SendData(ProtocolConfigurationData data)
         {
-            var convertedData = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(data);
+            var convertedData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
             stream.Write(convertedData, 0, convertedData.Length);
         }
 
@@ -24,22 +24,30 @@ namespace NetworkProtocols
         {
             byte[] buffer = new byte[1_024];
             int bytesRead = stream.Read(buffer, 0, buffer.Length);
-
             if (bytesRead < buffer.Length)
             {
                 Array.Resize(ref buffer, bytesRead);
             }
             var bytesAsString = Encoding.UTF8.GetString(buffer);
-            return JsonConvert.DeserializeObject<ProtocolConfigurationData>(bytesAsString);
+            try
+            {
+                var convertedData = JsonConvert.DeserializeObject<ProtocolConfigurationData>(bytesAsString);
+                return convertedData;
+            }
+            catch (JsonSerializationException)
+            {
+                Console.WriteLine(Encoding.UTF8.GetString(buffer).Trim(new Char[] { '"' }));
+                return null;
+            }
         }
 
-        public void SendResultCommand(string command)
-        {
+        public void SendCommand(string command)
+        {   
             var convertedData = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(command);
             stream.Write(convertedData, 0, convertedData.Length);
         }
 
-        public string ReceiveResultCommand()
+        public string ReceiveCommand()
         {
             byte[] buffer = new byte[1_024];
             int bytesRead = stream.Read(buffer, 0, buffer.Length);
@@ -48,8 +56,7 @@ namespace NetworkProtocols
             {
                 Array.Resize(ref buffer, bytesRead);
             }
-            return Encoding.UTF8.GetString(buffer);
+            return Encoding.UTF8.GetString(buffer).Trim(new Char[] { '"' });
         }
-
     }
 }
