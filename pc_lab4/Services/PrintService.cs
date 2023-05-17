@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,9 +18,9 @@ namespace Services
             Console.WriteLine("0. Exit");
         }
 
-        public static void ShowConnectionMessage(int clientId)
+        public static void ShowConnectionMessage(EndPoint? endPoint)
         {
-            Console.WriteLine($"Client #{clientId} connected.");
+            Console.WriteLine("Client connected: {0}", endPoint);
         }
     }
 }

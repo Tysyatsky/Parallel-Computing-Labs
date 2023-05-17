@@ -8,23 +8,26 @@ namespace Server
 {
     class CustomProtocolServer
     {
+        private static Socket? listener;
         static void Main()
         {
-            TcpListener listener = new(IPAddress.Any, 4000);
-            listener.Start();
+            listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            listener.Bind(new IPEndPoint(IPAddress.Any, 4000));
+            listener.Listen(10);
+
             Console.WriteLine("CustomProtocolServer started. Listening for connections on port 4000...");
 
             while (true)
             {
-                TcpClient client = listener.AcceptTcpClient();
+                Socket client = listener.Accept();
+                PrintService.ShowConnectionMessage(client.RemoteEndPoint);
                 Task.Run(() => HandleClient(client));
             }
         }
 
-        static void HandleClient(TcpClient client)
+        static void HandleClient(Socket client)
         {
-            PrintService.ShowConnectionMessage(client.GetHashCode());
-            MatrixProtocol protocol = new(client.GetStream());
+            MatrixProtocol protocol = new(client);
             ProtocolConfigurationData? message = null;
             TaskCompletionSource<int[][]> source = new();
             Task<int[][]> task = source.Task;

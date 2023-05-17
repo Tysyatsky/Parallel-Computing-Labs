@@ -7,23 +7,23 @@ namespace NetworkProtocols
 {
     public class MatrixProtocol
     {
-        private readonly NetworkStream stream;
+        private readonly Socket socket;
 
-        public MatrixProtocol(NetworkStream stream)
+        public MatrixProtocol(Socket socket)
         {
-            this.stream = stream;
+            this.socket = socket;
         }
 
         public void SendData(ProtocolConfigurationData data)
         {
             var convertedData = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
-            stream.Write(convertedData, 0, convertedData.Length);
+            socket.Send(convertedData);
         }
 
         public ProtocolConfigurationData? ReceiveData()
         {
-            byte[] buffer = new byte[1_024];
-            int bytesRead = stream.Read(buffer, 0, buffer.Length);
+            byte[] buffer = new byte[100_240];
+            int bytesRead = socket.Receive(buffer);
             if (bytesRead < buffer.Length)
             {
                 Array.Resize(ref buffer, bytesRead);
@@ -36,7 +36,7 @@ namespace NetworkProtocols
             }
             catch (JsonSerializationException)
             {
-                Console.WriteLine(Encoding.UTF8.GetString(buffer).Trim(new Char[] { '"' }));
+                Console.WriteLine(Encoding.UTF8.GetString(buffer).Trim(new char[] { '"' }));
                 return null;
             }
         }
@@ -44,19 +44,19 @@ namespace NetworkProtocols
         public void SendCommand(string command)
         {   
             var convertedData = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(command);
-            stream.Write(convertedData, 0, convertedData.Length);
+            socket.Send(convertedData);
         }
 
         public string ReceiveCommand()
         {
-            byte[] buffer = new byte[1_024];
-            int bytesRead = stream.Read(buffer, 0, buffer.Length);
+            byte[] buffer = new byte[1_240];
+            int bytesRead = socket.Receive(buffer);
 
             if (bytesRead < buffer.Length)
             {
                 Array.Resize(ref buffer, bytesRead);
             }
-            return Encoding.UTF8.GetString(buffer).Trim(new Char[] { '"' });
+            return Encoding.UTF8.GetString(buffer).Trim(new char[] { '"' });
         }
     }
 }
