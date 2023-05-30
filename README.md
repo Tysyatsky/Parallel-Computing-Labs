@@ -4,7 +4,9 @@ Repository for PC Labs for the National Technical University of Ukraine 'Kyiv Po
 ### Grades
 Lab 1 - 10.
 Lab 2 - 10.
-Lab 3 - 7.
+Lab 3 - 10.
+Lab 4 - 10.
+Lab 5 - 10.
 
 # Lab 4 
 
